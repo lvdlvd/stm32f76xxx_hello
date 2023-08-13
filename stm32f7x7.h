@@ -13462,29 +13462,23 @@ inline uint32_t rcc_cr_get_hsitrim(struct RCC_Type* p) { return (p->CR & RCC_CR_
 
 // RCC->PLLCFGR PLL configuration register
 enum {
-	RCC_PLLCFGR_PLLQ3 = 1UL<<27, // Main PLL (PLL) division factor for USB OTG FS, SDIO and random number generator clocks
-	RCC_PLLCFGR_PLLQ2 = 1UL<<26, // Main PLL (PLL) division factor for USB OTG FS, SDIO and random number generator clocks
-	RCC_PLLCFGR_PLLQ1 = 1UL<<25, // Main PLL (PLL) division factor for USB OTG FS, SDIO and random number generator clocks
-	RCC_PLLCFGR_PLLQ0 = 1UL<<24, // Main PLL (PLL) division factor for USB OTG FS, SDIO and random number generator clocks
+	RCC_PLLCFGR_PLLR = ((1UL<<3)-1) << 28, // Main PLL (PLL) division factor for DSI clocks
+	RCC_PLLCFGR_PLLQ = ((1UL<<4)-1) << 24, // Main PLL (PLL) division factor for USB OTG FS, SDIO and random number generator clocks
 	RCC_PLLCFGR_PLLSRC = 1UL<<22, // Main PLL(PLL) and audio PLL (PLLI2S) entry clock source
-	RCC_PLLCFGR_PLLP1 = 1UL<<17, // Main PLL (PLL) division factor for main system clock
-	RCC_PLLCFGR_PLLP0 = 1UL<<16, // Main PLL (PLL) division factor for main system clock
-	RCC_PLLCFGR_PLLN8 = 1UL<<14, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN7 = 1UL<<13, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN6 = 1UL<<12, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN5 = 1UL<<11, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN4 = 1UL<<10, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN3 = 1UL<<9, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN2 = 1UL<<8, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN1 = 1UL<<7, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLN0 = 1UL<<6, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLM5 = 1UL<<5, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock
-	RCC_PLLCFGR_PLLM4 = 1UL<<4, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock
-	RCC_PLLCFGR_PLLM3 = 1UL<<3, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock
-	RCC_PLLCFGR_PLLM2 = 1UL<<2, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock
-	RCC_PLLCFGR_PLLM1 = 1UL<<1, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock
-	RCC_PLLCFGR_PLLM0 = 1UL<<0, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock		
+	RCC_PLLCFGR_PLLP = ((1UL<<2)-1) << 16, // Main PLL (PLL) division factor for main system clock
+	RCC_PLLCFGR_PLLN = ((1UL<<8)-1) << 6, // Main PLL (PLL) multiplication factor for VCO
+	RCC_PLLCFGR_PLLM = ((1UL<<5)-1) << 0, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock		
 };
+inline void rcc_pllcfgr_set_pllr(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLR) | ((val<<28) & RCC_PLLCFGR_PLLR); }
+inline void rcc_pllcfgr_set_pllq(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLQ) | ((val<<24) & RCC_PLLCFGR_PLLQ); }
+inline void rcc_pllcfgr_set_pllp(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLP) | ((val<<16) & RCC_PLLCFGR_PLLP); }
+inline void rcc_pllcfgr_set_plln(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLN) | ((val<<6) & RCC_PLLCFGR_PLLN); }
+inline void rcc_pllcfgr_set_pllm(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLM) | ((val<<0) & RCC_PLLCFGR_PLLM); }
+inline uint32_t rcc_pllcfgr_get_pllr(struct RCC_Type* p) { return (p->PLLCFGR & RCC_PLLCFGR_PLLR) >> 28 ; }
+inline uint32_t rcc_pllcfgr_get_pllq(struct RCC_Type* p) { return (p->PLLCFGR & RCC_PLLCFGR_PLLQ) >> 24 ; }
+inline uint32_t rcc_pllcfgr_get_pllp(struct RCC_Type* p) { return (p->PLLCFGR & RCC_PLLCFGR_PLLP) >> 16 ; }
+inline uint32_t rcc_pllcfgr_get_plln(struct RCC_Type* p) { return (p->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6 ; }
+inline uint32_t rcc_pllcfgr_get_pllm(struct RCC_Type* p) { return (p->PLLCFGR & RCC_PLLCFGR_PLLM) >> 0 ; }
 
 // RCC->CFGR clock configuration register
 enum {
@@ -13497,10 +13491,8 @@ enum {
 	RCC_CFGR_PPRE2 = ((1UL<<3)-1) << 13, // APB high-speed prescaler (APB2)
 	RCC_CFGR_PPRE1 = ((1UL<<3)-1) << 10, // APB Low speed prescaler (APB1)
 	RCC_CFGR_HPRE = ((1UL<<4)-1) << 4, // AHB prescaler
-	RCC_CFGR_SWS1 = 1UL<<3, // System clock switch status
-	RCC_CFGR_SWS0 = 1UL<<2, // System clock switch status
-	RCC_CFGR_SW1 = 1UL<<1, // System clock switch
-	RCC_CFGR_SW0 = 1UL<<0, // System clock switch		
+	RCC_CFGR_SWS = ((1UL<<2)-1) << 2, // System clock switch status
+	RCC_CFGR_SW = ((1UL<<2)-1) << 0, // System clock switch		
 };
 inline void rcc_cfgr_set_mco2(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_MCO2) | ((val<<30) & RCC_CFGR_MCO2); }
 inline void rcc_cfgr_set_mco2pre(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_MCO2PRE) | ((val<<27) & RCC_CFGR_MCO2PRE); }
@@ -13510,6 +13502,8 @@ inline void rcc_cfgr_set_rtcpre(struct RCC_Type* p, uint32_t val) { p->CFGR = (p
 inline void rcc_cfgr_set_ppre2(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_PPRE2) | ((val<<13) & RCC_CFGR_PPRE2); }
 inline void rcc_cfgr_set_ppre1(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_PPRE1) | ((val<<10) & RCC_CFGR_PPRE1); }
 inline void rcc_cfgr_set_hpre(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_HPRE) | ((val<<4) & RCC_CFGR_HPRE); }
+inline void rcc_cfgr_set_sws(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_SWS) | ((val<<2) & RCC_CFGR_SWS); }
+inline void rcc_cfgr_set_sw(struct RCC_Type* p, uint32_t val) { p->CFGR = (p->CFGR & ~RCC_CFGR_SW) | ((val<<0) & RCC_CFGR_SW); }
 inline uint32_t rcc_cfgr_get_mco2(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_MCO2) >> 30 ; }
 inline uint32_t rcc_cfgr_get_mco2pre(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_MCO2PRE) >> 27 ; }
 inline uint32_t rcc_cfgr_get_mco1pre(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_MCO1PRE) >> 24 ; }
@@ -13518,6 +13512,8 @@ inline uint32_t rcc_cfgr_get_rtcpre(struct RCC_Type* p) { return (p->CFGR & RCC_
 inline uint32_t rcc_cfgr_get_ppre2(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_PPRE2) >> 13 ; }
 inline uint32_t rcc_cfgr_get_ppre1(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_PPRE1) >> 10 ; }
 inline uint32_t rcc_cfgr_get_hpre(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_HPRE) >> 4 ; }
+inline uint32_t rcc_cfgr_get_sws(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_SWS) >> 2 ; }
+inline uint32_t rcc_cfgr_get_sw(struct RCC_Type* p) { return (p->CFGR & RCC_CFGR_SW) >> 0 ; }
 
 // RCC->CIR clock interrupt register
 enum {
