@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stm32f7xx.h"
+#include "stm32f7x7.h"
 
 // sets the priority grouping field using the required unlock sequence.
 // val 0...7  indicates the position of the binary point that splits the PRI_n fields in the Interrupt Priority Registers into separate group priority and subpriority

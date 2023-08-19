@@ -43,10 +43,10 @@ static int setSysClockTo144MHz(void) {
 		rcc_pllcfgr_set_pllm(&RCC, 8);     // 2..63       : vco_in = HSI / m  1..2MHz   16/8 = 2MHz
 	}
 
-	rcc_pllcfgr_set_plln(&RCC, 288);	// 50...423   : vco_out = vco_in * n =  100..432 MHz    
-	rcc_pllcfgr_set_pllp(&RCC, 0); 	// 0,1,2,3 -> r=2,4,6,8  : sysclk = vco_out / r <= 192MHz  
-	rcc_pllcfgr_set_pllq(&RCC, 3); 	// q=2..15    : usb clock = vco_out / q  = 48MHz
-	rcc_pllcfgr_set_pllr(&RCC, 3); 	// r=2..7     : dsi clock = vco_out / r  ??
+	rcc_pllcfgr_set_plln(&RCC, 144);	// 50...423   : vco_out = vco_in * n =  100..432 MHz   (288 Mhz) 
+	rcc_pllcfgr_set_pllp(&RCC, 0); 	// 0,1,2,3 -> r=2,4,6,8  : sysclk = vco_out / r <= 192MHz  (144 Mhz)
+	rcc_pllcfgr_set_pllq(&RCC, 6); 	// q=2..15    : usb clock = vco_out / q  = 48MHz
+	rcc_pllcfgr_set_pllr(&RCC, 6); 	// r=2..7     : dsi clock = vco_out / r  ??
 	RCC.CR |= RCC_CR_PLLON;
 
 	// prepare the flash	

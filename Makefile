@@ -22,8 +22,9 @@ OBJS = \
 	fault.o \
 	clock.o \
 	gpio2.o \
+	main.o 
 
-#		printf.o 	usart.o 	usb.o 	main.o 
+#		printf.o 	usart.o 	usb.o 
 
 
 $(OBJS): Makefile 

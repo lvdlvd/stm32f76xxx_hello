@@ -38,7 +38,7 @@ SECTIONS
     PROVIDE (isr_vector_table_base = .);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
-  } >FLASHROM
+  } >ITCMROM AT>FLASHROM
 
   /* The program code and other data goes into ITCMROM, aliased at FLASHROM */
   .text :
