@@ -115,7 +115,7 @@ enum IRQn_Type {
 	SPI6_IRQn = 86, // SPI 6 global interrupt
 	SAI1_IRQn = 87, // SAI1 global interrupt
 	LCD_TFT_IRQn = 88, // LTDC global interrupt
-	LCD_TFT_IRQn = 89, // LCD-TFT global Error interrupt
+	LCD_TFT_ER_IRQn = 89, // LCD-TFT global Error interrupt
 	DMA2D_IRQn = 90, // DMA2D global interrupt
 	SAI2_IRQn = 91, // SAI2 global interrupt
 	QuadSPI_IRQn = 92, // QuadSPI global interrupt
@@ -4785,6 +4785,90 @@ enum {
 	ETHERNET_PTP_PTPPPSCR_TSSO = 1UL<<0, // TSSO		
 };
 
+/* FLASH */
+struct FLASH_Type {
+	__IO uint16_t ACR; // @0 Flash access control register
+	 uint8_t RESERVED0[2]; // @2 
+	__O uint32_t KEYR; // @4 Flash key register
+	__O uint32_t OPTKEYR; // @8 Flash option key register
+	__IO uint32_t SR; // @12 Status register
+	__IO uint32_t CR; // @16 Control register
+	__IO uint32_t OPTCR; // @20 Flash option control register
+	__IO uint32_t OPTCR1; // @24 Flash option control register 1
+};
+
+// FLASH->ACR Flash access control register
+enum {
+	FLASH_ACR_ARTRST = 1UL<<11, // ART Accelerator reset
+	FLASH_ACR_ARTEN = 1UL<<9, // ART Accelerator Enable
+	FLASH_ACR_PRFTEN = 1UL<<8, // Prefetch enable
+	FLASH_ACR_LATENCY = ((1UL<<4)-1) << 0, // Latency		
+};
+inline void flash_acr_set_latency(struct FLASH_Type* p, uint32_t val) { p->ACR = (p->ACR & ~FLASH_ACR_LATENCY) | ((val<<0) & FLASH_ACR_LATENCY); }
+inline uint32_t flash_acr_get_latency(struct FLASH_Type* p) { return (p->ACR & FLASH_ACR_LATENCY) >> 0 ; }
+
+// FLASH->SR Status register
+enum {
+	FLASH_SR_BSY = 1UL<<16, // Busy
+	FLASH_SR_ERSERR = 1UL<<7, // Programming sequence error
+	FLASH_SR_PGPERR = 1UL<<6, // Programming parallelism error
+	FLASH_SR_PGAERR = 1UL<<5, // Programming alignment error
+	FLASH_SR_WRPERR = 1UL<<4, // Write protection error
+	FLASH_SR_OPERR = 1UL<<1, // Operation error
+	FLASH_SR_EOP = 1UL<<0, // End of operation		
+};
+
+// FLASH->CR Control register
+enum {
+	FLASH_CR_LOCK = 1UL<<31, // Lock
+	FLASH_CR_ERRIE = 1UL<<25, // Error interrupt enable
+	FLASH_CR_EOPIE = 1UL<<24, // End of operation interrupt enable
+	FLASH_CR_STRT = 1UL<<16, // Start
+	FLASH_CR_MER2 = 1UL<<15, // Mass Erase of sectors 12 to 23
+	FLASH_CR_PSIZE = ((1UL<<2)-1) << 8, // Program size
+	FLASH_CR_SNB = ((1UL<<5)-1) << 3, // Sector number
+	FLASH_CR_MER1 = 1UL<<2, // Mass Erase of sectors 0 to 11
+	FLASH_CR_SER = 1UL<<1, // Sector Erase
+	FLASH_CR_PG = 1UL<<0, // Programming		
+};
+inline void flash_cr_set_psize(struct FLASH_Type* p, uint32_t val) { p->CR = (p->CR & ~FLASH_CR_PSIZE) | ((val<<8) & FLASH_CR_PSIZE); }
+inline void flash_cr_set_snb(struct FLASH_Type* p, uint32_t val) { p->CR = (p->CR & ~FLASH_CR_SNB) | ((val<<3) & FLASH_CR_SNB); }
+inline uint32_t flash_cr_get_psize(struct FLASH_Type* p) { return (p->CR & FLASH_CR_PSIZE) >> 8 ; }
+inline uint32_t flash_cr_get_snb(struct FLASH_Type* p) { return (p->CR & FLASH_CR_SNB) >> 3 ; }
+
+// FLASH->OPTCR Flash option control register
+enum {
+	FLASH_OPTCR_IWDG_STOP = 1UL<<31, // Independent watchdog counter freeze in Stop mode
+	FLASH_OPTCR_IWDG_STDBY = 1UL<<30, // Independent watchdog counter freeze in standby mode
+	FLASH_OPTCR_NDBANK = 1UL<<29, // Not dual bank mode
+	FLASH_OPTCR_NDBOOT = 1UL<<28, // Dual Boot mode (valid only when nDBANK=0)
+	FLASH_OPTCR_NWRP = ((1UL<<12)-1) << 16, // Not write protect
+	FLASH_OPTCR_RDP = ((1UL<<8)-1) << 8, // Read protect
+	FLASH_OPTCR_NRST_STDBY = 1UL<<7, // User option bytes
+	FLASH_OPTCR_NRST_STOP = 1UL<<6, // User option bytes
+	FLASH_OPTCR_IWDG_SW = 1UL<<5, // User option bytes
+	FLASH_OPTCR_WWDG_SW = 1UL<<4, // User option bytes
+	FLASH_OPTCR_BOR_LEV = ((1UL<<2)-1) << 2, // BOR reset Level
+	FLASH_OPTCR_OPTSTRT = 1UL<<1, // Option start
+	FLASH_OPTCR_OPTLOCK = 1UL<<0, // Option lock		
+};
+inline void flash_optcr_set_nwrp(struct FLASH_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_NWRP) | ((val<<16) & FLASH_OPTCR_NWRP); }
+inline void flash_optcr_set_rdp(struct FLASH_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_RDP) | ((val<<8) & FLASH_OPTCR_RDP); }
+inline void flash_optcr_set_bor_lev(struct FLASH_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_BOR_LEV) | ((val<<2) & FLASH_OPTCR_BOR_LEV); }
+inline uint32_t flash_optcr_get_nwrp(struct FLASH_Type* p) { return (p->OPTCR & FLASH_OPTCR_NWRP) >> 16 ; }
+inline uint32_t flash_optcr_get_rdp(struct FLASH_Type* p) { return (p->OPTCR & FLASH_OPTCR_RDP) >> 8 ; }
+inline uint32_t flash_optcr_get_bor_lev(struct FLASH_Type* p) { return (p->OPTCR & FLASH_OPTCR_BOR_LEV) >> 2 ; }
+
+// FLASH->OPTCR1 Flash option control register 1
+enum {
+	FLASH_OPTCR1_BOOT_ADD1 = ((1UL<<16)-1) << 16, // Boot base address when Boot pin =1
+	FLASH_OPTCR1_BOOT_ADD0 = ((1UL<<16)-1) << 0, // Boot base address when Boot pin =0		
+};
+inline void flash_optcr1_set_boot_add1(struct FLASH_Type* p, uint32_t val) { p->OPTCR1 = (p->OPTCR1 & ~FLASH_OPTCR1_BOOT_ADD1) | ((val<<16) & FLASH_OPTCR1_BOOT_ADD1); }
+inline void flash_optcr1_set_boot_add0(struct FLASH_Type* p, uint32_t val) { p->OPTCR1 = (p->OPTCR1 & ~FLASH_OPTCR1_BOOT_ADD0) | ((val<<0) & FLASH_OPTCR1_BOOT_ADD0); }
+inline uint32_t flash_optcr1_get_boot_add1(struct FLASH_Type* p) { return (p->OPTCR1 & FLASH_OPTCR1_BOOT_ADD1) >> 16 ; }
+inline uint32_t flash_optcr1_get_boot_add0(struct FLASH_Type* p) { return (p->OPTCR1 & FLASH_OPTCR1_BOOT_ADD0) >> 0 ; }
+
 /* Flexible memory controller */
 struct FMC_Type {
 	__IO uint32_t BCR1; // @0 SRAM/NOR-Flash chip-select control register 1
@@ -5356,90 +5440,6 @@ enum {
 inline void fpu_cpacr_cpacr_set_cp(struct FPU_CPACR_Type* p, uint32_t val) { p->CPACR = (p->CPACR & ~FPU_CPACR_CPACR_CP) | ((val<<20) & FPU_CPACR_CPACR_CP); }
 inline uint32_t fpu_cpacr_cpacr_get_cp(struct FPU_CPACR_Type* p) { return (p->CPACR & FPU_CPACR_CPACR_CP) >> 20 ; }
 
-/* FLASH */
-struct Flash_Type {
-	__IO uint16_t ACR; // @0 Flash access control register
-	 uint8_t RESERVED0[2]; // @2 
-	__O uint32_t KEYR; // @4 Flash key register
-	__O uint32_t OPTKEYR; // @8 Flash option key register
-	__IO uint32_t SR; // @12 Status register
-	__IO uint32_t CR; // @16 Control register
-	__IO uint32_t OPTCR; // @20 Flash option control register
-	__IO uint32_t OPTCR1; // @24 Flash option control register 1
-};
-
-// Flash->ACR Flash access control register
-enum {
-	FLASH_ACR_ARTRST = 1UL<<11, // ART Accelerator reset
-	FLASH_ACR_ARTEN = 1UL<<9, // ART Accelerator Enable
-	FLASH_ACR_PRFTEN = 1UL<<8, // Prefetch enable
-	FLASH_ACR_LATENCY = ((1UL<<4)-1) << 0, // Latency		
-};
-inline void flash_acr_set_latency(struct Flash_Type* p, uint32_t val) { p->ACR = (p->ACR & ~FLASH_ACR_LATENCY) | ((val<<0) & FLASH_ACR_LATENCY); }
-inline uint32_t flash_acr_get_latency(struct Flash_Type* p) { return (p->ACR & FLASH_ACR_LATENCY) >> 0 ; }
-
-// Flash->SR Status register
-enum {
-	FLASH_SR_BSY = 1UL<<16, // Busy
-	FLASH_SR_ERSERR = 1UL<<7, // Programming sequence error
-	FLASH_SR_PGPERR = 1UL<<6, // Programming parallelism error
-	FLASH_SR_PGAERR = 1UL<<5, // Programming alignment error
-	FLASH_SR_WRPERR = 1UL<<4, // Write protection error
-	FLASH_SR_OPERR = 1UL<<1, // Operation error
-	FLASH_SR_EOP = 1UL<<0, // End of operation		
-};
-
-// Flash->CR Control register
-enum {
-	FLASH_CR_LOCK = 1UL<<31, // Lock
-	FLASH_CR_ERRIE = 1UL<<25, // Error interrupt enable
-	FLASH_CR_EOPIE = 1UL<<24, // End of operation interrupt enable
-	FLASH_CR_STRT = 1UL<<16, // Start
-	FLASH_CR_MER2 = 1UL<<15, // Mass Erase of sectors 12 to 23
-	FLASH_CR_PSIZE = ((1UL<<2)-1) << 8, // Program size
-	FLASH_CR_SNB = ((1UL<<5)-1) << 3, // Sector number
-	FLASH_CR_MER1 = 1UL<<2, // Mass Erase of sectors 0 to 11
-	FLASH_CR_SER = 1UL<<1, // Sector Erase
-	FLASH_CR_PG = 1UL<<0, // Programming		
-};
-inline void flash_cr_set_psize(struct Flash_Type* p, uint32_t val) { p->CR = (p->CR & ~FLASH_CR_PSIZE) | ((val<<8) & FLASH_CR_PSIZE); }
-inline void flash_cr_set_snb(struct Flash_Type* p, uint32_t val) { p->CR = (p->CR & ~FLASH_CR_SNB) | ((val<<3) & FLASH_CR_SNB); }
-inline uint32_t flash_cr_get_psize(struct Flash_Type* p) { return (p->CR & FLASH_CR_PSIZE) >> 8 ; }
-inline uint32_t flash_cr_get_snb(struct Flash_Type* p) { return (p->CR & FLASH_CR_SNB) >> 3 ; }
-
-// Flash->OPTCR Flash option control register
-enum {
-	FLASH_OPTCR_IWDG_STOP = 1UL<<31, // Independent watchdog counter freeze in Stop mode
-	FLASH_OPTCR_IWDG_STDBY = 1UL<<30, // Independent watchdog counter freeze in standby mode
-	FLASH_OPTCR_NDBANK = 1UL<<29, // Not dual bank mode
-	FLASH_OPTCR_NDBOOT = 1UL<<28, // Dual Boot mode (valid only when nDBANK=0)
-	FLASH_OPTCR_NWRP = ((1UL<<12)-1) << 16, // Not write protect
-	FLASH_OPTCR_RDP = ((1UL<<8)-1) << 8, // Read protect
-	FLASH_OPTCR_NRST_STDBY = 1UL<<7, // User option bytes
-	FLASH_OPTCR_NRST_STOP = 1UL<<6, // User option bytes
-	FLASH_OPTCR_IWDG_SW = 1UL<<5, // User option bytes
-	FLASH_OPTCR_WWDG_SW = 1UL<<4, // User option bytes
-	FLASH_OPTCR_BOR_LEV = ((1UL<<2)-1) << 2, // BOR reset Level
-	FLASH_OPTCR_OPTSTRT = 1UL<<1, // Option start
-	FLASH_OPTCR_OPTLOCK = 1UL<<0, // Option lock		
-};
-inline void flash_optcr_set_nwrp(struct Flash_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_NWRP) | ((val<<16) & FLASH_OPTCR_NWRP); }
-inline void flash_optcr_set_rdp(struct Flash_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_RDP) | ((val<<8) & FLASH_OPTCR_RDP); }
-inline void flash_optcr_set_bor_lev(struct Flash_Type* p, uint32_t val) { p->OPTCR = (p->OPTCR & ~FLASH_OPTCR_BOR_LEV) | ((val<<2) & FLASH_OPTCR_BOR_LEV); }
-inline uint32_t flash_optcr_get_nwrp(struct Flash_Type* p) { return (p->OPTCR & FLASH_OPTCR_NWRP) >> 16 ; }
-inline uint32_t flash_optcr_get_rdp(struct Flash_Type* p) { return (p->OPTCR & FLASH_OPTCR_RDP) >> 8 ; }
-inline uint32_t flash_optcr_get_bor_lev(struct Flash_Type* p) { return (p->OPTCR & FLASH_OPTCR_BOR_LEV) >> 2 ; }
-
-// Flash->OPTCR1 Flash option control register 1
-enum {
-	FLASH_OPTCR1_BOOT_ADD1 = ((1UL<<16)-1) << 16, // Boot base address when Boot pin =1
-	FLASH_OPTCR1_BOOT_ADD0 = ((1UL<<16)-1) << 0, // Boot base address when Boot pin =0		
-};
-inline void flash_optcr1_set_boot_add1(struct Flash_Type* p, uint32_t val) { p->OPTCR1 = (p->OPTCR1 & ~FLASH_OPTCR1_BOOT_ADD1) | ((val<<16) & FLASH_OPTCR1_BOOT_ADD1); }
-inline void flash_optcr1_set_boot_add0(struct Flash_Type* p, uint32_t val) { p->OPTCR1 = (p->OPTCR1 & ~FLASH_OPTCR1_BOOT_ADD0) | ((val<<0) & FLASH_OPTCR1_BOOT_ADD0); }
-inline uint32_t flash_optcr1_get_boot_add1(struct Flash_Type* p) { return (p->OPTCR1 & FLASH_OPTCR1_BOOT_ADD1) >> 16 ; }
-inline uint32_t flash_optcr1_get_boot_add0(struct Flash_Type* p) { return (p->OPTCR1 & FLASH_OPTCR1_BOOT_ADD0) >> 0 ; }
-
 /* General-purpose I/Os */
 struct GPIOA_Type {
 	__IO uint32_t MODER; // @0 GPIO port mode register
@@ -5807,14 +5807,14 @@ struct HASH_Type {
 	__IO uint32_t CSR52; // @456 context swap registers
 	__IO uint32_t CSR53; // @460 context swap registers
 	 uint8_t RESERVED3[320]; // @464 
-	__I uint32_t HR0; // @784 HASH digest register
-	__I uint32_t HR1; // @788 read-only
-	__I uint32_t HR2; // @792 read-only
-	__I uint32_t HR3; // @796 read-only
-	__I uint32_t HR4; // @800 read-only
-	__I uint32_t HR5; // @804 read-only
-	__I uint32_t HR6; // @808 read-only
-	__I uint32_t HR7; // @812 read-only
+	__I uint32_t HHR0; // @784 HASH digest register
+	__I uint32_t HHR1; // @788 read-only
+	__I uint32_t HHR2; // @792 read-only
+	__I uint32_t HHR3; // @796 read-only
+	__I uint32_t HHR4; // @800 read-only
+	__I uint32_t HHR5; // @804 read-only
+	__I uint32_t HHR6; // @808 read-only
+	__I uint32_t HHR7; // @812 read-only
 };
 
 // HASH->CR control register
@@ -13467,7 +13467,7 @@ enum {
 	RCC_PLLCFGR_PLLSRC = 1UL<<22, // Main PLL(PLL) and audio PLL (PLLI2S) entry clock source
 	RCC_PLLCFGR_PLLP = ((1UL<<2)-1) << 16, // Main PLL (PLL) division factor for main system clock
 	RCC_PLLCFGR_PLLN = ((1UL<<8)-1) << 6, // Main PLL (PLL) multiplication factor for VCO
-	RCC_PLLCFGR_PLLM = ((1UL<<5)-1) << 0, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock		
+	RCC_PLLCFGR_PLLM = ((1UL<<6)-1) << 0, // Division factor for the main PLL (PLL) and audio PLL (PLLI2S) input clock		
 };
 inline void rcc_pllcfgr_set_pllr(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLR) | ((val<<28) & RCC_PLLCFGR_PLLR); }
 inline void rcc_pllcfgr_set_pllq(struct RCC_Type* p, uint32_t val) { p->PLLCFGR = (p->PLLCFGR & ~RCC_PLLCFGR_PLLQ) | ((val<<24) & RCC_PLLCFGR_PLLQ); }
@@ -14594,7 +14594,7 @@ struct SCB_Type {
 	__IO uint32_t SHPR1; // @24 System handler priority registers
 	__IO uint32_t SHPR2; // @28 System handler priority registers
 	__IO uint32_t SHPR3; // @32 System handler priority registers
-	__IO uint32_t SHCRS; // @36 System handler control and state register
+	__IO uint32_t SHCSR; // @36 System handler control and state register
 	__IO uint32_t CFSR_UFSR_BFSR_MMFSR; // @40 Configurable fault status register
 	__IO uint32_t HFSR; // @44 Hard fault status register
 	 uint8_t RESERVED1[4]; // @48 
@@ -14704,22 +14704,22 @@ inline void scb_shpr3_set_pri_14(struct SCB_Type* p, uint32_t val) { p->SHPR3 = 
 inline uint32_t scb_shpr3_get_pri_15(struct SCB_Type* p) { return (p->SHPR3 & SCB_SHPR3_PRI_15) >> 24 ; }
 inline uint32_t scb_shpr3_get_pri_14(struct SCB_Type* p) { return (p->SHPR3 & SCB_SHPR3_PRI_14) >> 16 ; }
 
-// SCB->SHCRS System handler control and state register
+// SCB->SHCSR System handler control and state register
 enum {
-	SCB_SHCRS_USGFAULTENA = 1UL<<18, // Usage fault enable bit
-	SCB_SHCRS_BUSFAULTENA = 1UL<<17, // Bus fault enable bit
-	SCB_SHCRS_MEMFAULTENA = 1UL<<16, // Memory management fault enable bit
-	SCB_SHCRS_SVCALLPENDED = 1UL<<15, // SVC call pending bit
-	SCB_SHCRS_BUSFAULTPENDED = 1UL<<14, // Bus fault exception pending bit
-	SCB_SHCRS_MEMFAULTPENDED = 1UL<<13, // Memory management fault exception pending bit
-	SCB_SHCRS_USGFAULTPENDED = 1UL<<12, // Usage fault exception pending bit
-	SCB_SHCRS_SYSTICKACT = 1UL<<11, // SysTick exception active bit
-	SCB_SHCRS_PENDSVACT = 1UL<<10, // PendSV exception active bit
-	SCB_SHCRS_MONITORACT = 1UL<<8, // Debug monitor active bit
-	SCB_SHCRS_SVCALLACT = 1UL<<7, // SVC call active bit
-	SCB_SHCRS_USGFAULTACT = 1UL<<3, // Usage fault exception active bit
-	SCB_SHCRS_BUSFAULTACT = 1UL<<1, // Bus fault exception active bit
-	SCB_SHCRS_MEMFAULTACT = 1UL<<0, // Memory management fault exception active bit		
+	SCB_SHCSR_USGFAULTENA = 1UL<<18, // Usage fault enable bit
+	SCB_SHCSR_BUSFAULTENA = 1UL<<17, // Bus fault enable bit
+	SCB_SHCSR_MEMFAULTENA = 1UL<<16, // Memory management fault enable bit
+	SCB_SHCSR_SVCALLPENDED = 1UL<<15, // SVC call pending bit
+	SCB_SHCSR_BUSFAULTPENDED = 1UL<<14, // Bus fault exception pending bit
+	SCB_SHCSR_MEMFAULTPENDED = 1UL<<13, // Memory management fault exception pending bit
+	SCB_SHCSR_USGFAULTPENDED = 1UL<<12, // Usage fault exception pending bit
+	SCB_SHCSR_SYSTICKACT = 1UL<<11, // SysTick exception active bit
+	SCB_SHCSR_PENDSVACT = 1UL<<10, // PendSV exception active bit
+	SCB_SHCSR_MONITORACT = 1UL<<8, // Debug monitor active bit
+	SCB_SHCSR_SVCALLACT = 1UL<<7, // SVC call active bit
+	SCB_SHCSR_USGFAULTACT = 1UL<<3, // Usage fault exception active bit
+	SCB_SHCSR_BUSFAULTACT = 1UL<<1, // Bus fault exception active bit
+	SCB_SHCSR_MEMFAULTACT = 1UL<<0, // Memory management fault exception active bit		
 };
 
 // SCB->CFSR_UFSR_BFSR_MMFSR Configurable fault status register
@@ -16691,11 +16691,8 @@ enum {
 
 
 
-
-
-
 /* Universal synchronous asynchronous receiver transmitter */
-struct USART6_Type {
+struct USART1_Type {
 	__IO uint32_t CR1; // @0 Control register 1
 	__IO uint32_t CR2; // @4 Control register 2
 	__IO uint32_t CR3; // @8 Control register 3
@@ -16713,189 +16710,192 @@ struct USART6_Type {
 	__IO uint16_t TDR; // @40 Transmit data register
 };
 
-// USART6->CR1 Control register 1
+// USART1->CR1 Control register 1
 enum {
-	USART6_CR1_M1 = 1UL<<28, // Word length
-	USART6_CR1_EOBIE = 1UL<<27, // End of Block interrupt enable
-	USART6_CR1_RTOIE = 1UL<<26, // Receiver timeout interrupt enable
-	USART6_CR1_DEAT4 = 1UL<<25, // Driver Enable assertion time
-	USART6_CR1_DEAT3 = 1UL<<24, // DEAT3
-	USART6_CR1_DEAT2 = 1UL<<23, // DEAT2
-	USART6_CR1_DEAT1 = 1UL<<22, // DEAT1
-	USART6_CR1_DEAT0 = 1UL<<21, // DEAT0
-	USART6_CR1_DEDT4 = 1UL<<20, // Driver Enable de-assertion time
-	USART6_CR1_DEDT3 = 1UL<<19, // DEDT3
-	USART6_CR1_DEDT2 = 1UL<<18, // DEDT2
-	USART6_CR1_DEDT1 = 1UL<<17, // DEDT1
-	USART6_CR1_DEDT0 = 1UL<<16, // DEDT0
-	USART6_CR1_OVER8 = 1UL<<15, // Oversampling mode
-	USART6_CR1_CMIE = 1UL<<14, // Character match interrupt enable
-	USART6_CR1_MME = 1UL<<13, // Mute mode enable
-	USART6_CR1_M0 = 1UL<<12, // Word length
-	USART6_CR1_WAKE = 1UL<<11, // Receiver wakeup method
-	USART6_CR1_PCE = 1UL<<10, // Parity control enable
-	USART6_CR1_PS = 1UL<<9, // Parity selection
-	USART6_CR1_PEIE = 1UL<<8, // PE interrupt enable
-	USART6_CR1_TXEIE = 1UL<<7, // interrupt enable
-	USART6_CR1_TCIE = 1UL<<6, // Transmission complete interrupt enable
-	USART6_CR1_RXNEIE = 1UL<<5, // RXNE interrupt enable
-	USART6_CR1_IDLEIE = 1UL<<4, // IDLE interrupt enable
-	USART6_CR1_TE = 1UL<<3, // Transmitter enable
-	USART6_CR1_RE = 1UL<<2, // Receiver enable
-	USART6_CR1_UESM = 1UL<<1, // USART enable in Stop mode
-	USART6_CR1_UE = 1UL<<0, // USART enable		
+	USART1_CR1_M1 = 1UL<<28, // Word length
+	USART1_CR1_EOBIE = 1UL<<27, // End of Block interrupt enable
+	USART1_CR1_RTOIE = 1UL<<26, // Receiver timeout interrupt enable
+	USART1_CR1_DEAT4 = 1UL<<25, // Driver Enable assertion time
+	USART1_CR1_DEAT3 = 1UL<<24, // DEAT3
+	USART1_CR1_DEAT2 = 1UL<<23, // DEAT2
+	USART1_CR1_DEAT1 = 1UL<<22, // DEAT1
+	USART1_CR1_DEAT0 = 1UL<<21, // DEAT0
+	USART1_CR1_DEDT4 = 1UL<<20, // Driver Enable de-assertion time
+	USART1_CR1_DEDT3 = 1UL<<19, // DEDT3
+	USART1_CR1_DEDT2 = 1UL<<18, // DEDT2
+	USART1_CR1_DEDT1 = 1UL<<17, // DEDT1
+	USART1_CR1_DEDT0 = 1UL<<16, // DEDT0
+	USART1_CR1_OVER8 = 1UL<<15, // Oversampling mode
+	USART1_CR1_CMIE = 1UL<<14, // Character match interrupt enable
+	USART1_CR1_MME = 1UL<<13, // Mute mode enable
+	USART1_CR1_M0 = 1UL<<12, // Word length
+	USART1_CR1_WAKE = 1UL<<11, // Receiver wakeup method
+	USART1_CR1_PCE = 1UL<<10, // Parity control enable
+	USART1_CR1_PS = 1UL<<9, // Parity selection
+	USART1_CR1_PEIE = 1UL<<8, // PE interrupt enable
+	USART1_CR1_TXEIE = 1UL<<7, // interrupt enable
+	USART1_CR1_TCIE = 1UL<<6, // Transmission complete interrupt enable
+	USART1_CR1_RXNEIE = 1UL<<5, // RXNE interrupt enable
+	USART1_CR1_IDLEIE = 1UL<<4, // IDLE interrupt enable
+	USART1_CR1_TE = 1UL<<3, // Transmitter enable
+	USART1_CR1_RE = 1UL<<2, // Receiver enable
+	USART1_CR1_UESM = 1UL<<1, // USART enable in Stop mode
+	USART1_CR1_UE = 1UL<<0, // USART enable		
 };
 
-// USART6->CR2 Control register 2
+// USART1->CR2 Control register 2
 enum {
-	USART6_CR2_ADD4_7 = ((1UL<<4)-1) << 28, // Address of the USART node
-	USART6_CR2_ADD0_3 = ((1UL<<4)-1) << 24, // Address of the USART node
-	USART6_CR2_RTOEN = 1UL<<23, // Receiver timeout enable
-	USART6_CR2_ABRMOD1 = 1UL<<22, // Auto baud rate mode
-	USART6_CR2_ABRMOD0 = 1UL<<21, // ABRMOD0
-	USART6_CR2_ABREN = 1UL<<20, // Auto baud rate enable
-	USART6_CR2_MSBFIRST = 1UL<<19, // Most significant bit first
-	USART6_CR2_TAINV = 1UL<<18, // Binary data inversion
-	USART6_CR2_TXINV = 1UL<<17, // TX pin active level inversion
-	USART6_CR2_RXINV = 1UL<<16, // RX pin active level inversion
-	USART6_CR2_SWAP = 1UL<<15, // Swap TX/RX pins
-	USART6_CR2_LINEN = 1UL<<14, // LIN mode enable
-	USART6_CR2_STOP = ((1UL<<2)-1) << 12, // STOP bits
-	USART6_CR2_CLKEN = 1UL<<11, // Clock enable
-	USART6_CR2_CPOL = 1UL<<10, // Clock polarity
-	USART6_CR2_CPHA = 1UL<<9, // Clock phase
-	USART6_CR2_LBCL = 1UL<<8, // Last bit clock pulse
-	USART6_CR2_LBDIE = 1UL<<6, // LIN break detection interrupt enable
-	USART6_CR2_LBDL = 1UL<<5, // LIN break detection length
-	USART6_CR2_ADDM7 = 1UL<<4, // 7-bit Address Detection/4-bit Address Detection		
+	USART1_CR2_ADD4_7 = ((1UL<<4)-1) << 28, // Address of the USART node
+	USART1_CR2_ADD0_3 = ((1UL<<4)-1) << 24, // Address of the USART node
+	USART1_CR2_RTOEN = 1UL<<23, // Receiver timeout enable
+	USART1_CR2_ABRMOD1 = 1UL<<22, // Auto baud rate mode
+	USART1_CR2_ABRMOD0 = 1UL<<21, // ABRMOD0
+	USART1_CR2_ABREN = 1UL<<20, // Auto baud rate enable
+	USART1_CR2_MSBFIRST = 1UL<<19, // Most significant bit first
+	USART1_CR2_TAINV = 1UL<<18, // Binary data inversion
+	USART1_CR2_TXINV = 1UL<<17, // TX pin active level inversion
+	USART1_CR2_RXINV = 1UL<<16, // RX pin active level inversion
+	USART1_CR2_SWAP = 1UL<<15, // Swap TX/RX pins
+	USART1_CR2_LINEN = 1UL<<14, // LIN mode enable
+	USART1_CR2_STOP = ((1UL<<2)-1) << 12, // STOP bits
+	USART1_CR2_CLKEN = 1UL<<11, // Clock enable
+	USART1_CR2_CPOL = 1UL<<10, // Clock polarity
+	USART1_CR2_CPHA = 1UL<<9, // Clock phase
+	USART1_CR2_LBCL = 1UL<<8, // Last bit clock pulse
+	USART1_CR2_LBDIE = 1UL<<6, // LIN break detection interrupt enable
+	USART1_CR2_LBDL = 1UL<<5, // LIN break detection length
+	USART1_CR2_ADDM7 = 1UL<<4, // 7-bit Address Detection/4-bit Address Detection		
 };
-inline void usart6_cr2_set_add4_7(struct USART6_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART6_CR2_ADD4_7) | ((val<<28) & USART6_CR2_ADD4_7); }
-inline void usart6_cr2_set_add0_3(struct USART6_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART6_CR2_ADD0_3) | ((val<<24) & USART6_CR2_ADD0_3); }
-inline void usart6_cr2_set_stop(struct USART6_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART6_CR2_STOP) | ((val<<12) & USART6_CR2_STOP); }
-inline uint32_t usart6_cr2_get_add4_7(struct USART6_Type* p) { return (p->CR2 & USART6_CR2_ADD4_7) >> 28 ; }
-inline uint32_t usart6_cr2_get_add0_3(struct USART6_Type* p) { return (p->CR2 & USART6_CR2_ADD0_3) >> 24 ; }
-inline uint32_t usart6_cr2_get_stop(struct USART6_Type* p) { return (p->CR2 & USART6_CR2_STOP) >> 12 ; }
+inline void usart1_cr2_set_add4_7(struct USART1_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART1_CR2_ADD4_7) | ((val<<28) & USART1_CR2_ADD4_7); }
+inline void usart1_cr2_set_add0_3(struct USART1_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART1_CR2_ADD0_3) | ((val<<24) & USART1_CR2_ADD0_3); }
+inline void usart1_cr2_set_stop(struct USART1_Type* p, uint32_t val) { p->CR2 = (p->CR2 & ~USART1_CR2_STOP) | ((val<<12) & USART1_CR2_STOP); }
+inline uint32_t usart1_cr2_get_add4_7(struct USART1_Type* p) { return (p->CR2 & USART1_CR2_ADD4_7) >> 28 ; }
+inline uint32_t usart1_cr2_get_add0_3(struct USART1_Type* p) { return (p->CR2 & USART1_CR2_ADD0_3) >> 24 ; }
+inline uint32_t usart1_cr2_get_stop(struct USART1_Type* p) { return (p->CR2 & USART1_CR2_STOP) >> 12 ; }
 
-// USART6->CR3 Control register 3
+// USART1->CR3 Control register 3
 enum {
-	USART6_CR3_WUFIE = 1UL<<22, // Wakeup from Stop mode interrupt enable
-	USART6_CR3_WUS = ((1UL<<2)-1) << 20, // Wakeup from Stop mode interrupt flag selection
-	USART6_CR3_SCARCNT = ((1UL<<3)-1) << 17, // Smartcard auto-retry count
-	USART6_CR3_DEP = 1UL<<15, // Driver enable polarity selection
-	USART6_CR3_DEM = 1UL<<14, // Driver enable mode
-	USART6_CR3_DDRE = 1UL<<13, // DMA Disable on Reception Error
-	USART6_CR3_OVRDIS = 1UL<<12, // Overrun Disable
-	USART6_CR3_ONEBIT = 1UL<<11, // One sample bit method enable
-	USART6_CR3_CTSIE = 1UL<<10, // CTS interrupt enable
-	USART6_CR3_CTSE = 1UL<<9, // CTS enable
-	USART6_CR3_RTSE = 1UL<<8, // RTS enable
-	USART6_CR3_DMAT = 1UL<<7, // DMA enable transmitter
-	USART6_CR3_DMAR = 1UL<<6, // DMA enable receiver
-	USART6_CR3_SCEN = 1UL<<5, // Smartcard mode enable
-	USART6_CR3_NACK = 1UL<<4, // Smartcard NACK enable
-	USART6_CR3_HDSEL = 1UL<<3, // Half-duplex selection
-	USART6_CR3_IRLP = 1UL<<2, // Ir low-power
-	USART6_CR3_IREN = 1UL<<1, // Ir mode enable
-	USART6_CR3_EIE = 1UL<<0, // Error interrupt enable		
+	USART1_CR3_WUFIE = 1UL<<22, // Wakeup from Stop mode interrupt enable
+	USART1_CR3_WUS = ((1UL<<2)-1) << 20, // Wakeup from Stop mode interrupt flag selection
+	USART1_CR3_SCARCNT = ((1UL<<3)-1) << 17, // Smartcard auto-retry count
+	USART1_CR3_DEP = 1UL<<15, // Driver enable polarity selection
+	USART1_CR3_DEM = 1UL<<14, // Driver enable mode
+	USART1_CR3_DDRE = 1UL<<13, // DMA Disable on Reception Error
+	USART1_CR3_OVRDIS = 1UL<<12, // Overrun Disable
+	USART1_CR3_ONEBIT = 1UL<<11, // One sample bit method enable
+	USART1_CR3_CTSIE = 1UL<<10, // CTS interrupt enable
+	USART1_CR3_CTSE = 1UL<<9, // CTS enable
+	USART1_CR3_RTSE = 1UL<<8, // RTS enable
+	USART1_CR3_DMAT = 1UL<<7, // DMA enable transmitter
+	USART1_CR3_DMAR = 1UL<<6, // DMA enable receiver
+	USART1_CR3_SCEN = 1UL<<5, // Smartcard mode enable
+	USART1_CR3_NACK = 1UL<<4, // Smartcard NACK enable
+	USART1_CR3_HDSEL = 1UL<<3, // Half-duplex selection
+	USART1_CR3_IRLP = 1UL<<2, // Ir low-power
+	USART1_CR3_IREN = 1UL<<1, // Ir mode enable
+	USART1_CR3_EIE = 1UL<<0, // Error interrupt enable		
 };
-inline void usart6_cr3_set_wus(struct USART6_Type* p, uint32_t val) { p->CR3 = (p->CR3 & ~USART6_CR3_WUS) | ((val<<20) & USART6_CR3_WUS); }
-inline void usart6_cr3_set_scarcnt(struct USART6_Type* p, uint32_t val) { p->CR3 = (p->CR3 & ~USART6_CR3_SCARCNT) | ((val<<17) & USART6_CR3_SCARCNT); }
-inline uint32_t usart6_cr3_get_wus(struct USART6_Type* p) { return (p->CR3 & USART6_CR3_WUS) >> 20 ; }
-inline uint32_t usart6_cr3_get_scarcnt(struct USART6_Type* p) { return (p->CR3 & USART6_CR3_SCARCNT) >> 17 ; }
+inline void usart1_cr3_set_wus(struct USART1_Type* p, uint32_t val) { p->CR3 = (p->CR3 & ~USART1_CR3_WUS) | ((val<<20) & USART1_CR3_WUS); }
+inline void usart1_cr3_set_scarcnt(struct USART1_Type* p, uint32_t val) { p->CR3 = (p->CR3 & ~USART1_CR3_SCARCNT) | ((val<<17) & USART1_CR3_SCARCNT); }
+inline uint32_t usart1_cr3_get_wus(struct USART1_Type* p) { return (p->CR3 & USART1_CR3_WUS) >> 20 ; }
+inline uint32_t usart1_cr3_get_scarcnt(struct USART1_Type* p) { return (p->CR3 & USART1_CR3_SCARCNT) >> 17 ; }
 
-// USART6->BRR Baud rate register
+// USART1->BRR Baud rate register
 enum {
-	USART6_BRR_DIV_MANTISSA = ((1UL<<12)-1) << 4, // DIV_Mantissa
-	USART6_BRR_DIV_FRACTION = ((1UL<<4)-1) << 0, // DIV_Fraction		
+	USART1_BRR_DIV_MANTISSA = ((1UL<<12)-1) << 4, // DIV_Mantissa
+	USART1_BRR_DIV_FRACTION = ((1UL<<4)-1) << 0, // DIV_Fraction		
 };
-inline void usart6_brr_set_div_mantissa(struct USART6_Type* p, uint32_t val) { p->BRR = (p->BRR & ~USART6_BRR_DIV_MANTISSA) | ((val<<4) & USART6_BRR_DIV_MANTISSA); }
-inline void usart6_brr_set_div_fraction(struct USART6_Type* p, uint32_t val) { p->BRR = (p->BRR & ~USART6_BRR_DIV_FRACTION) | ((val<<0) & USART6_BRR_DIV_FRACTION); }
-inline uint32_t usart6_brr_get_div_mantissa(struct USART6_Type* p) { return (p->BRR & USART6_BRR_DIV_MANTISSA) >> 4 ; }
-inline uint32_t usart6_brr_get_div_fraction(struct USART6_Type* p) { return (p->BRR & USART6_BRR_DIV_FRACTION) >> 0 ; }
+inline void usart1_brr_set_div_mantissa(struct USART1_Type* p, uint32_t val) { p->BRR = (p->BRR & ~USART1_BRR_DIV_MANTISSA) | ((val<<4) & USART1_BRR_DIV_MANTISSA); }
+inline void usart1_brr_set_div_fraction(struct USART1_Type* p, uint32_t val) { p->BRR = (p->BRR & ~USART1_BRR_DIV_FRACTION) | ((val<<0) & USART1_BRR_DIV_FRACTION); }
+inline uint32_t usart1_brr_get_div_mantissa(struct USART1_Type* p) { return (p->BRR & USART1_BRR_DIV_MANTISSA) >> 4 ; }
+inline uint32_t usart1_brr_get_div_fraction(struct USART1_Type* p) { return (p->BRR & USART1_BRR_DIV_FRACTION) >> 0 ; }
 
-// USART6->GTPR Guard time and prescaler register
+// USART1->GTPR Guard time and prescaler register
 enum {
-	USART6_GTPR_GT = ((1UL<<8)-1) << 8, // Guard time value
-	USART6_GTPR_PSC = ((1UL<<8)-1) << 0, // Prescaler value		
+	USART1_GTPR_GT = ((1UL<<8)-1) << 8, // Guard time value
+	USART1_GTPR_PSC = ((1UL<<8)-1) << 0, // Prescaler value		
 };
-inline void usart6_gtpr_set_gt(struct USART6_Type* p, uint32_t val) { p->GTPR = (p->GTPR & ~USART6_GTPR_GT) | ((val<<8) & USART6_GTPR_GT); }
-inline void usart6_gtpr_set_psc(struct USART6_Type* p, uint32_t val) { p->GTPR = (p->GTPR & ~USART6_GTPR_PSC) | ((val<<0) & USART6_GTPR_PSC); }
-inline uint32_t usart6_gtpr_get_gt(struct USART6_Type* p) { return (p->GTPR & USART6_GTPR_GT) >> 8 ; }
-inline uint32_t usart6_gtpr_get_psc(struct USART6_Type* p) { return (p->GTPR & USART6_GTPR_PSC) >> 0 ; }
+inline void usart1_gtpr_set_gt(struct USART1_Type* p, uint32_t val) { p->GTPR = (p->GTPR & ~USART1_GTPR_GT) | ((val<<8) & USART1_GTPR_GT); }
+inline void usart1_gtpr_set_psc(struct USART1_Type* p, uint32_t val) { p->GTPR = (p->GTPR & ~USART1_GTPR_PSC) | ((val<<0) & USART1_GTPR_PSC); }
+inline uint32_t usart1_gtpr_get_gt(struct USART1_Type* p) { return (p->GTPR & USART1_GTPR_GT) >> 8 ; }
+inline uint32_t usart1_gtpr_get_psc(struct USART1_Type* p) { return (p->GTPR & USART1_GTPR_PSC) >> 0 ; }
 
-// USART6->RTOR Receiver timeout register
+// USART1->RTOR Receiver timeout register
 enum {
-	USART6_RTOR_BLEN = ((1UL<<8)-1) << 24, // Block Length
-	USART6_RTOR_RTO = ((1UL<<24)-1) << 0, // Receiver timeout value		
+	USART1_RTOR_BLEN = ((1UL<<8)-1) << 24, // Block Length
+	USART1_RTOR_RTO = ((1UL<<24)-1) << 0, // Receiver timeout value		
 };
-inline void usart6_rtor_set_blen(struct USART6_Type* p, uint32_t val) { p->RTOR = (p->RTOR & ~USART6_RTOR_BLEN) | ((val<<24) & USART6_RTOR_BLEN); }
-inline void usart6_rtor_set_rto(struct USART6_Type* p, uint32_t val) { p->RTOR = (p->RTOR & ~USART6_RTOR_RTO) | ((val<<0) & USART6_RTOR_RTO); }
-inline uint32_t usart6_rtor_get_blen(struct USART6_Type* p) { return (p->RTOR & USART6_RTOR_BLEN) >> 24 ; }
-inline uint32_t usart6_rtor_get_rto(struct USART6_Type* p) { return (p->RTOR & USART6_RTOR_RTO) >> 0 ; }
+inline void usart1_rtor_set_blen(struct USART1_Type* p, uint32_t val) { p->RTOR = (p->RTOR & ~USART1_RTOR_BLEN) | ((val<<24) & USART1_RTOR_BLEN); }
+inline void usart1_rtor_set_rto(struct USART1_Type* p, uint32_t val) { p->RTOR = (p->RTOR & ~USART1_RTOR_RTO) | ((val<<0) & USART1_RTOR_RTO); }
+inline uint32_t usart1_rtor_get_blen(struct USART1_Type* p) { return (p->RTOR & USART1_RTOR_BLEN) >> 24 ; }
+inline uint32_t usart1_rtor_get_rto(struct USART1_Type* p) { return (p->RTOR & USART1_RTOR_RTO) >> 0 ; }
 
-// USART6->RQR Request register
+// USART1->RQR Request register
 enum {
-	USART6_RQR_TXFRQ = 1UL<<4, // Transmit data flush request
-	USART6_RQR_RXFRQ = 1UL<<3, // Receive data flush request
-	USART6_RQR_MMRQ = 1UL<<2, // Mute mode request
-	USART6_RQR_SBKRQ = 1UL<<1, // Send break request
-	USART6_RQR_ABRRQ = 1UL<<0, // Auto baud rate request		
-};
-
-// USART6->ISR Interrupt & status register
-enum {
-	USART6_ISR_REACK = 1UL<<22, // REACK
-	USART6_ISR_TEACK = 1UL<<21, // TEACK
-	USART6_ISR_WUF = 1UL<<20, // WUF
-	USART6_ISR_RWU = 1UL<<19, // RWU
-	USART6_ISR_SBKF = 1UL<<18, // SBKF
-	USART6_ISR_CMF = 1UL<<17, // CMF
-	USART6_ISR_BUSY = 1UL<<16, // BUSY
-	USART6_ISR_ABRF = 1UL<<15, // ABRF
-	USART6_ISR_ABRE = 1UL<<14, // ABRE
-	USART6_ISR_EOBF = 1UL<<12, // EOBF
-	USART6_ISR_RTOF = 1UL<<11, // RTOF
-	USART6_ISR_CTS = 1UL<<10, // CTS
-	USART6_ISR_CTSIF = 1UL<<9, // CTSIF
-	USART6_ISR_LBDF = 1UL<<8, // LBDF
-	USART6_ISR_TXE = 1UL<<7, // TXE
-	USART6_ISR_TC = 1UL<<6, // TC
-	USART6_ISR_RXNE = 1UL<<5, // RXNE
-	USART6_ISR_IDLE = 1UL<<4, // IDLE
-	USART6_ISR_ORE = 1UL<<3, // ORE
-	USART6_ISR_NF = 1UL<<2, // NF
-	USART6_ISR_FE = 1UL<<1, // FE
-	USART6_ISR_PE = 1UL<<0, // PE		
+	USART1_RQR_TXFRQ = 1UL<<4, // Transmit data flush request
+	USART1_RQR_RXFRQ = 1UL<<3, // Receive data flush request
+	USART1_RQR_MMRQ = 1UL<<2, // Mute mode request
+	USART1_RQR_SBKRQ = 1UL<<1, // Send break request
+	USART1_RQR_ABRRQ = 1UL<<0, // Auto baud rate request		
 };
 
-// USART6->ICR Interrupt flag clear register
+// USART1->ISR Interrupt & status register
 enum {
-	USART6_ICR_WUCF = 1UL<<20, // Wakeup from Stop mode clear flag
-	USART6_ICR_CMCF = 1UL<<17, // Character match clear flag
-	USART6_ICR_EOBCF = 1UL<<12, // End of block clear flag
-	USART6_ICR_RTOCF = 1UL<<11, // Receiver timeout clear flag
-	USART6_ICR_CTSCF = 1UL<<9, // CTS clear flag
-	USART6_ICR_LBDCF = 1UL<<8, // LIN break detection clear flag
-	USART6_ICR_TCCF = 1UL<<6, // Transmission complete clear flag
-	USART6_ICR_IDLECF = 1UL<<4, // Idle line detected clear flag
-	USART6_ICR_ORECF = 1UL<<3, // Overrun error clear flag
-	USART6_ICR_NCF = 1UL<<2, // Noise detected clear flag
-	USART6_ICR_FECF = 1UL<<1, // Framing error clear flag
-	USART6_ICR_PECF = 1UL<<0, // Parity error clear flag		
+	USART1_ISR_REACK = 1UL<<22, // REACK
+	USART1_ISR_TEACK = 1UL<<21, // TEACK
+	USART1_ISR_WUF = 1UL<<20, // WUF
+	USART1_ISR_RWU = 1UL<<19, // RWU
+	USART1_ISR_SBKF = 1UL<<18, // SBKF
+	USART1_ISR_CMF = 1UL<<17, // CMF
+	USART1_ISR_BUSY = 1UL<<16, // BUSY
+	USART1_ISR_ABRF = 1UL<<15, // ABRF
+	USART1_ISR_ABRE = 1UL<<14, // ABRE
+	USART1_ISR_EOBF = 1UL<<12, // EOBF
+	USART1_ISR_RTOF = 1UL<<11, // RTOF
+	USART1_ISR_CTS = 1UL<<10, // CTS
+	USART1_ISR_CTSIF = 1UL<<9, // CTSIF
+	USART1_ISR_LBDF = 1UL<<8, // LBDF
+	USART1_ISR_TXE = 1UL<<7, // TXE
+	USART1_ISR_TC = 1UL<<6, // TC
+	USART1_ISR_RXNE = 1UL<<5, // RXNE
+	USART1_ISR_IDLE = 1UL<<4, // IDLE
+	USART1_ISR_ORE = 1UL<<3, // ORE
+	USART1_ISR_NF = 1UL<<2, // NF
+	USART1_ISR_FE = 1UL<<1, // FE
+	USART1_ISR_PE = 1UL<<0, // PE		
 };
 
-// USART6->RDR Receive data register
+// USART1->ICR Interrupt flag clear register
 enum {
-	USART6_RDR_RDR = ((1UL<<9)-1) << 0, // Receive data value		
+	USART1_ICR_WUCF = 1UL<<20, // Wakeup from Stop mode clear flag
+	USART1_ICR_CMCF = 1UL<<17, // Character match clear flag
+	USART1_ICR_EOBCF = 1UL<<12, // End of block clear flag
+	USART1_ICR_RTOCF = 1UL<<11, // Receiver timeout clear flag
+	USART1_ICR_CTSCF = 1UL<<9, // CTS clear flag
+	USART1_ICR_LBDCF = 1UL<<8, // LIN break detection clear flag
+	USART1_ICR_TCCF = 1UL<<6, // Transmission complete clear flag
+	USART1_ICR_IDLECF = 1UL<<4, // Idle line detected clear flag
+	USART1_ICR_ORECF = 1UL<<3, // Overrun error clear flag
+	USART1_ICR_NCF = 1UL<<2, // Noise detected clear flag
+	USART1_ICR_FECF = 1UL<<1, // Framing error clear flag
+	USART1_ICR_PECF = 1UL<<0, // Parity error clear flag		
 };
-inline uint32_t usart6_rdr_get_rdr(struct USART6_Type* p) { return (p->RDR & USART6_RDR_RDR) >> 0 ; }
 
-// USART6->TDR Transmit data register
+// USART1->RDR Receive data register
 enum {
-	USART6_TDR_TDR = ((1UL<<9)-1) << 0, // Transmit data value		
+	USART1_RDR_RDR = ((1UL<<9)-1) << 0, // Receive data value		
 };
-inline void usart6_tdr_set_tdr(struct USART6_Type* p, uint32_t val) { p->TDR = (p->TDR & ~USART6_TDR_TDR) | ((val<<0) & USART6_TDR_TDR); }
-inline uint32_t usart6_tdr_get_tdr(struct USART6_Type* p) { return (p->TDR & USART6_TDR_TDR) >> 0 ; }
+inline uint32_t usart1_rdr_get_rdr(struct USART1_Type* p) { return (p->RDR & USART1_RDR_RDR) >> 0 ; }
+
+// USART1->TDR Transmit data register
+enum {
+	USART1_TDR_TDR = ((1UL<<9)-1) << 0, // Transmit data value		
+};
+inline void usart1_tdr_set_tdr(struct USART1_Type* p, uint32_t val) { p->TDR = (p->TDR & ~USART1_TDR_TDR) | ((val<<0) & USART1_TDR_TDR); }
+inline uint32_t usart1_tdr_get_tdr(struct USART1_Type* p) { return (p->TDR & USART1_TDR_TDR) >> 0 ; }
+
+
+
 
 /* Window watchdog */
 struct WWDG_Type {
@@ -16957,10 +16957,10 @@ extern struct Ethernet_DMA_Type	Ethernet_DMA;	// @0x40029000
 extern struct Ethernet_MAC_Type	Ethernet_MAC;	// @0x40028000 
 extern struct Ethernet_MMC_Type	Ethernet_MMC;	// @0x40028100 
 extern struct Ethernet_PTP_Type	Ethernet_PTP;	// @0x40028700 
+extern struct FLASH_Type	FLASH;	// @0x40023C00 
 extern struct FMC_Type	FMC;	// @0xA0000000 
 extern struct FPU_Type	FPU;	// @0xE000EF34 
 extern struct FPU_CPACR_Type	FPU_CPACR;	// @0xE000ED88 
-extern struct Flash_Type	Flash;	// @0x40023C00 
 extern struct GPIOA_Type	GPIOA;	// @0x40020000 
 extern struct GPIOA_Type 	GPIOB;	// @0x40020400
 extern struct GPIOA_Type 	GPIOC;	// @0x40020800
@@ -17028,13 +17028,13 @@ extern struct TIM6_Type	TIM6;	// @0x40001000
 extern struct TIM6_Type 	TIM7;	// @0x40001400
 extern struct TIM1_Type 	TIM8;	// @0x40010400
 extern struct TIM9_Type	TIM9;	// @0x40014000 
-extern struct USART6_Type 	UART4;	// @0x40004C00
-extern struct USART6_Type 	UART5;	// @0x40005000
-extern struct USART6_Type 	UART7;	// @0x40007800
-extern struct USART6_Type 	UART8;	// @0x40007C00
-extern struct USART6_Type 	USART1;	// @0x40011000
-extern struct USART6_Type 	USART2;	// @0x40004400
-extern struct USART6_Type 	USART3;	// @0x40004800
-extern struct USART6_Type	USART6;	// @0x40011400 
+extern struct USART1_Type 	UART4;	// @0x40004C00
+extern struct USART1_Type 	UART5;	// @0x40005000
+extern struct USART1_Type 	UART7;	// @0x40007800
+extern struct USART1_Type 	UART8;	// @0x40007C00
+extern struct USART1_Type	USART1;	// @0x40011000 
+extern struct USART1_Type 	USART2;	// @0x40004400
+extern struct USART1_Type 	USART3;	// @0x40004800
+extern struct USART1_Type 	USART6;	// @0x40011400
 extern struct WWDG_Type	WWDG;	// @0x40002C00 
 

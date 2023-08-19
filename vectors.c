@@ -116,7 +116,7 @@ void SPI5_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void SPI6_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void SAI1_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void LCD_TFT_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
-void LCD_TFT_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
+void LCD_TFT_ER_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void DMA2D_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void SAI2_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
 void QuadSPI_Handler(void) __attribute__((weak, alias("default_IRQ_Handler")));
@@ -243,7 +243,7 @@ __attribute__((section(".isr_vector"))) void (*vector_table[])(void) = {
     [16+SPI6_IRQn] = SPI6_Handler,  // 86 SPI 6 global interrupt
     [16+SAI1_IRQn] = SAI1_Handler,  // 87 SAI1 global interrupt
     [16+LCD_TFT_IRQn] = LCD_TFT_Handler,  // 88 LTDC global interrupt
-    [16+LCD_TFT_IRQn] = LCD_TFT_Handler,  // 89 LCD-TFT global Error interrupt
+    [16+LCD_TFT_ER_IRQn] = LCD_TFT_ER_Handler,  // 89 LCD-TFT global Error interrupt
     [16+DMA2D_IRQn] = DMA2D_Handler,  // 90 DMA2D global interrupt
     [16+SAI2_IRQn] = SAI2_Handler,  // 91 SAI2 global interrupt
     [16+QuadSPI_IRQn] = QuadSPI_Handler,  // 92 QuadSPI global interrupt
