@@ -31,8 +31,8 @@ static int setSysClockTo144MHz(void) {
 			break;
 
 	rcc_cfgr_set_hpre(&RCC, 0);  // AHB HCLK = SYSCLK =  144MHz
-	rcc_cfgr_set_ppre1(&RCC, 5); // APB1 PCLK = AHB HCLK / 4  not to exceed 45MHz
-	rcc_cfgr_set_ppre2(&RCC, 4); // APB2 PCLK = AHB HCLK / 2  not to exceed 90MHz
+	rcc_cfgr_set_ppre1(&RCC, 5); // APB1 PCLK = AHB HCLK / 4  = 36 not to exceed 45MHz
+	rcc_cfgr_set_ppre2(&RCC, 4); // APB2 PCLK = AHB HCLK / 2  = 72 not to exceed 90MHz
 
 	// Configure the main PLL 
 	if (RCC.CR & RCC_CR_HSERDY) {
